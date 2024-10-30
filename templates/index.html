@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price Prediction</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-image: url('https://media.vanityfair.com/photos/55818448320a56cf42412ce1/master/pass/breaking-bad-walter-white-dad-cars.jpg'), url('https://media.vanityfair.com/photos/55818448320a56cf42412ce1/master/pass/breaking-bad-walter-white-dad-cars.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .container {
+            max-width: 400px;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            margin-top: 100px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #333;
+        }
+        .form-control {
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Car Price Prediction</h1>
+        <form action="/predict" method="POST">
+            <div class="form-group">
+                <label for="kms_driven">Kms Driven:</label>
+                <input type="number" step="any" class="form-control" name="kms_driven" required>
+            </div>
+            <div class="form-group">
+                <label for="mileage_kmpl">Mileage (kmpl):</label>
+                <input type="number" step="any" class="form-control" name="mileage_kmpl" required>
+            </div>
+            <div class="form-group">
+                <label for="engine_cc">Engine (cc):</label>
+                <input type="number" step="any" class="form-control" name="engine_cc" required>
+            </div>
+            <div class="form-group">
+                <label for="max_power_bhp">Max Power (bhp):</label>
+                <input type="number" step="any" class="form-control" name="max_power_bhp" required>
+            </div>
+            <div class="form-group">
+                <label for="torque_nm">Torque (Nm):</label>
+                <input type="number" step="any" class="form-control" name="torque_nm" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Predict Price</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

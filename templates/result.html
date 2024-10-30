@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-image: url('https://www.topgear.com/sites/default/files/images/gallery-migration/2014-03/E200ED6F-96A3-44D8-ABE0-F90A8327F1D1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .result-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px; /* Reduced padding */
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            margin: 50px auto; /* Center the container */
+            text-align: center;
+            position: relative;
+            z-index: 2; /* Ensures container is above the overlay */
+            max-width: 400px; /* Set max width to make it narrower */
+        }
+        .overlay {
+            background: rgba(0, 0, 0, 0.5);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+        h1 {
+            color: #333;
+        }
+        .btn-success {
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div> <!-- Overlay for dark effect -->
+    <div class="result-container">
+        <h1>Predicted Price</h1>
+        <p class="lead">The predicted price of the car is: ₹{{ prediction }} lakhs</p>
+        <a href="/" class="btn btn-success">Go Back</a>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
