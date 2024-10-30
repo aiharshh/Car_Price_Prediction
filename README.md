@@ -29,4 +29,5 @@ A web-based application for predicting car prices using machine learning algorit
 1. Clone the repository:
    
    git clone https://github.com/aiharshh/Car_Price_Prediction
+   
    cd Car_Price_Prediction
