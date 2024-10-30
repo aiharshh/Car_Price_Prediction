@@ -29,8 +29,11 @@ def predict():
     # Make prediction
     predicted_price = model.predict(input_data)
 
+    # Get the absolute value of the predicted price
+    predicted_price = abs(predicted_price[0])
+
     # Return result to the template
-    return render_template('result.html', prediction=predicted_price[0])
+    return render_template('result.html', prediction=predicted_price)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Use the port Heroku provides
