@@ -1,0 +1,13 @@
+{
+  "model_type": "RandomForest_Fallback_Enhanced",
+  "r2_score": 0.5951994020841112,
+  "mae": 5.65244799261254,
+  "rmse": 12.161596072787464,
+  "training_date": "2025-08-01T15:02:30.331583",
+  "feature_count": 25,
+  "training_samples": 848,
+  "test_samples": 283,
+  "data_cleaning_applied": true,
+  "outliers_removed": true,
+  "corruption_fixed": true
+}

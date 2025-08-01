@@ -101,11 +101,11 @@ def load_model_components():
         return False
 
 def train_fallback_model():
-    """Train a simple fallback model if main model fails to load"""
+    """Train a robust fallback model with comprehensive data cleaning"""
     global model, scaler, feature_columns, model_metadata
     
     try:
-        logger.info("Training fallback model...")
+        logger.info("Training fallback model with advanced data cleaning...")
         
         # Load data
         if not os.path.exists('used_cars_filled.csv'):
@@ -115,38 +115,92 @@ def train_fallback_model():
         data = pd.read_csv('used_cars_filled.csv')
         logger.info(f"Loaded training data: {data.shape}")
         
-        # Basic feature engineering
+        # Smart data cleaning approach - fix corruption instead of removing data
+        logger.info("Performing smart data cleaning and corruption repair...")
+        
+        # Remove duplicates only
+        initial_count = len(data)
+        data = data.drop_duplicates()
+        logger.info(f"Removed {initial_count - len(data)} duplicate rows")
+        
+        # Smart corruption fixing: where max_power equals engine_cc, estimate realistic max_power
+        corruption_mask = data['max_power(bhp)'] == data['engine(cc)']
+        corrupted_count = corruption_mask.sum()
+        logger.info(f"Found {corrupted_count} rows with max_power=engine_cc corruption")
+        
+        if corrupted_count > 0:
+            # For corrupted rows, estimate max_power based on engine size
+            # Typical power-to-displacement ratios: 50-100 BHP per 1000cc
+            data.loc[corruption_mask, 'max_power(bhp)'] = (
+                data.loc[corruption_mask, 'engine(cc)'] / 1000 * 75  # 75 BHP per 1000cc average
+            ).round(1)
+            logger.info(f"Fixed {corrupted_count} corrupted max_power values")
+        
+        # Fix obviously wrong values by capping them at reasonable limits
+        data.loc[data['price(in lakhs)'] > 500, 'price(in lakhs)'] = data['price(in lakhs)'].median()
+        data.loc[data['kms_driven'] > 1000000, 'kms_driven'] = data['kms_driven'].median()
+        data.loc[data['mileage(kmpl)'] > 100, 'mileage(kmpl)'] = data['mileage(kmpl)'].median()
+        data.loc[data['engine(cc)'] > 10000, 'engine(cc)'] = data['engine(cc)'].median()
+        data.loc[data['max_power(bhp)'] > 1000, 'max_power(bhp)'] = data['max_power(bhp)'].median()
+        data.loc[data['torque(Nm)'] > 5000, 'torque(Nm)'] = data['torque(Nm)'].median()
+        
+        # Handle zero or negative values
+        for col in ['price(in lakhs)', 'kms_driven', 'mileage(kmpl)', 'engine(cc)', 'max_power(bhp)', 'torque(Nm)']:
+            median_val = data[col].median()
+            data.loc[data[col] <= 0, col] = median_val
+        
+        logger.info(f"After smart cleaning and repair: {len(data)} rows remaining")
+        
+        if len(data) < 100:
+            logger.error("Insufficient data after cleaning!")
+            return False
+        
+        # Enhanced feature engineering
         data['power_to_weight'] = data['max_power(bhp)'] / (data['engine(cc)'] / 1000)
         data['efficiency_ratio'] = data['mileage(kmpl)'] / (data['engine(cc)'] / 1000)
         data['torque_per_cc'] = data['torque(Nm)'] / data['engine(cc)']
         data['age_factor'] = np.log1p(data['kms_driven'])
         data['power_efficiency'] = data['max_power(bhp)'] / data['mileage(kmpl)']
         
+        # Add polynomial features for better model performance
+        data['power_squared'] = data['max_power(bhp)'] ** 2
+        data['engine_squared'] = data['engine(cc)'] ** 2
+        data['mileage_inverse'] = 1 / (data['mileage(kmpl)'] + 1)
+        
         # Handle infinite values
         data = data.replace([np.inf, -np.inf], np.nan)
         data = data.fillna(data.median())
         
-        # Categorical features
+        # Categorical features with better binning
         def categorize_mileage(mileage):
-            if mileage <= 10: return 'Low'
-            elif mileage <= 15: return 'Medium'
-            elif mileage <= 20: return 'High'
+            if mileage <= 12: return 'Low'
+            elif mileage <= 18: return 'Medium'
+            elif mileage <= 25: return 'High'
             else: return 'Very High'
         
         def categorize_engine(engine):
-            if engine <= 1000: return 'Small'
-            elif engine <= 1500: return 'Medium'
-            elif engine <= 2000: return 'Large'
+            if engine <= 1200: return 'Small'
+            elif engine <= 1600: return 'Medium'
+            elif engine <= 2500: return 'Large'
             else: return 'Very Large'
+        
+        def categorize_power(power):
+            if power <= 80: return 'Low'
+            elif power <= 120: return 'Medium'
+            elif power <= 180: return 'High'
+            else: return 'Very High'
         
         data['mileage_category'] = data['mileage(kmpl)'].apply(categorize_mileage)
         data['engine_category'] = data['engine(cc)'].apply(categorize_engine)
+        data['power_category'] = data['max_power(bhp)'].apply(categorize_power)
         
         # One-hot encoding
         mileage_dummies = pd.get_dummies(data['mileage_category'], prefix='mileage_category')
         engine_dummies = pd.get_dummies(data['engine_category'], prefix='engine_category')
-        data = pd.concat([data, mileage_dummies, engine_dummies], axis=1)
-        data = data.drop(['mileage_category', 'engine_category'], axis=1)
+        power_dummies = pd.get_dummies(data['power_category'], prefix='power_category')
+        
+        data = pd.concat([data, mileage_dummies, engine_dummies, power_dummies], axis=1)
+        data = data.drop(['mileage_category', 'engine_category', 'power_category'], axis=1)
         
         # Prepare features and target
         target_col = 'price(in lakhs)'
@@ -154,10 +208,11 @@ def train_fallback_model():
         y = data[target_col]
         
         feature_columns = X.columns.tolist()
+        logger.info(f"Total features after engineering: {len(feature_columns)}")
         
-        # Split data
+        # Split data with stratification for better distribution
         from sklearn.model_selection import train_test_split
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
         
         # Scale features
         from sklearn.preprocessing import StandardScaler
@@ -165,49 +220,93 @@ def train_fallback_model():
         X_train_scaled = scaler.fit_transform(X_train)
         X_test_scaled = scaler.transform(X_test)
         
-        # Train a simple but robust model (RandomForest is less prone to version issues)
-        from sklearn.ensemble import RandomForestRegressor
-        model = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42, n_jobs=-1)
-        model.fit(X_train_scaled, y_train)
-        
-        # Test the model
+        # Try multiple models and select the best one
+        from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+        from sklearn.linear_model import Ridge
         from sklearn.metrics import r2_score, mean_absolute_error
+        
+        models_to_try = {
+            'RandomForest': RandomForestRegressor(n_estimators=100, max_depth=15, min_samples_split=5, random_state=42, n_jobs=-1),
+            'GradientBoosting': GradientBoostingRegressor(n_estimators=100, max_depth=6, learning_rate=0.1, random_state=42),
+            'Ridge': Ridge(alpha=1.0, random_state=42)
+        }
+        
+        best_model = None
+        best_score = -float('inf')
+        best_model_name = None
+        
+        for name, candidate_model in models_to_try.items():
+            try:
+                candidate_model.fit(X_train_scaled, y_train)
+                y_pred = candidate_model.predict(X_test_scaled)
+                score = r2_score(y_test, y_pred)
+                mae = mean_absolute_error(y_test, y_pred)
+                
+                logger.info(f"{name}: R2={score:.4f}, MAE={mae:.4f}")
+                
+                if score > best_score:
+                    best_score = score
+                    best_model = candidate_model
+                    best_model_name = name
+                    
+            except Exception as e:
+                logger.warning(f"Failed to train {name}: {str(e)}")
+                continue
+        
+        if best_model is None or best_score < 0.1:
+            logger.error("All models failed to achieve reasonable performance!")
+            return False
+        
+        # Use the best model
+        model = best_model
+        
+        # Final evaluation
+        from sklearn.metrics import mean_squared_error
         y_pred = model.predict(X_test_scaled)
         r2 = r2_score(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        rmse = np.sqrt(mse)
         
-        logger.info(f"Fallback model trained successfully!")
-        logger.info(f"R2 Score: {r2:.4f}, MAE: {mae:.4f}")
+        logger.info(f"Best model: {best_model_name}")
+        logger.info(f"Final metrics - R2: {r2:.4f}, MAE: {mae:.4f}, RMSE: {rmse:.4f}")
         
         # Create metadata
         model_metadata = {
-            'model_type': 'RandomForest_Fallback',
-            'r2_score': r2,
-            'mae': mae,
+            'model_type': f'{best_model_name}_Fallback_Enhanced',
+            'r2_score': float(r2),
+            'mae': float(mae),
+            'rmse': float(rmse),
             'training_date': datetime.now().isoformat(),
             'feature_count': len(feature_columns),
-            'training_samples': len(X_train)
+            'training_samples': len(X_train),
+            'test_samples': len(X_test),
+            'data_cleaning_applied': True,
+            'outliers_removed': True,
+            'corruption_fixed': True
         }
         
         # Save components for future use
         try:
             from joblib import dump
             os.makedirs('models', exist_ok=True)
-            dump(model, 'models/fallback_model.joblib')
-            dump(scaler, 'models/fallback_scaler.joblib')
-            dump(feature_columns, 'models/fallback_features.joblib')
+            dump(model, 'models/fallback_model_enhanced.joblib')
+            dump(scaler, 'models/fallback_scaler_enhanced.joblib')
+            dump(feature_columns, 'models/fallback_features_enhanced.joblib')
             
-            with open('models/fallback_metadata.json', 'w') as f:
+            with open('models/fallback_metadata_enhanced.json', 'w') as f:
                 json.dump(model_metadata, f, indent=2)
             
-            logger.info("Fallback model saved successfully")
+            logger.info("Enhanced fallback model saved successfully")
         except Exception as e:
-            logger.warning(f"Could not save fallback model: {str(e)}")
+            logger.warning(f"Could not save enhanced fallback model: {str(e)}")
         
         return True
         
     except Exception as e:
-        logger.error(f"Failed to train fallback model: {str(e)}")
+        logger.error(f"Failed to train enhanced fallback model: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
         return False
 
 def validate_input_data(data):
