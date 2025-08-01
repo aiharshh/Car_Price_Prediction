@@ -3,51 +3,414 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediction Result</title>
+    <title>Car Price Prediction Result</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
         body {
-            background-image: url('https://www.topgear.com/sites/default/files/images/gallery-migration/2014-03/E200ED6F-96A3-44D8-ABE0-F90A8327F1D1.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
         }
-        .result-container {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 15px; /* Reduced padding */
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            margin: 50px auto; /* Center the container */
+        
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .result-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        .error-card {
+            background: rgba(255, 235, 235, 0.95);
+            border: 2px solid #e74c3c;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(231, 76, 60, 0.1);
             text-align: center;
-            position: relative;
-            z-index: 2; /* Ensures container is above the overlay */
-            max-width: 400px; /* Set max width to make it narrower */
         }
-        .overlay {
-            background: rgba(0, 0, 0, 0.5);
+        
+        .success-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .price-display {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .price-display::before {
+            content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .main-price {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
             z-index: 1;
         }
-        h1 {
-            color: #333;
+        
+        .price-label {
+            font-size: 18px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
         }
-        .btn-success {
-            border-radius: 10px;
-            margin-top: 20px;
+        
+        .confidence-interval {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .confidence-range {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .range-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .range-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #3498db;
+        }
+        
+        .range-label {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .input-summary {
+            background: #e8f4fd;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .summary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #3498db;
+        }
+        
+        .summary-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .summary-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .model-info-card {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-custom {
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(52, 152, 219, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .btn-secondary-custom {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+            box-shadow: 0 8px 20px rgba(149, 165, 166, 0.3);
+        }
+        
+        .btn-secondary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(149, 165, 166, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .error-icon {
+            font-size: 64px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+        
+        .success-icon {
+            font-size: 64px;
+            color: #2ecc71;
+            margin-bottom: 20px;
+        }
+        
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3498db, transparent);
+            margin: 30px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 0 10px;
+            }
+            
+            .result-card {
+                padding: 25px;
+            }
+            
+            .main-price {
+                font-size: 36px;
+            }
+            
+            .confidence-range {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="overlay"></div> <!-- Overlay for dark effect -->
-    <div class="result-container">
-        <h1>Predicted Price</h1>
-        <p class="lead">The predicted price of the car is: ₹{{ prediction }} lakhs</p>
+    <div class="main-container">
+        {% if error %}
+        <!-- Error Display -->
+        <div class="error-card">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2 class="text-danger mb-3">Prediction Error</h2>
+            <p class="lead text-danger">{{ error }}</p>
+            <div class="btn-group mt-4">
+                <a href="/" class="btn-custom btn-primary-custom">
+                    <i class="fas fa-arrow-left"></i> Try Again
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <!-- Success Display -->
+        <div class="result-card">
+            <div class="success-header">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h1><i class="fas fa-car"></i> Car Price Prediction Result</h1>
+                <p class="text-muted">Advanced ML analysis complete</p>
+            </div>
+            
+            <!-- Main Price Display -->
+            <div class="price-display">
+                <div class="main-price">₹{{ prediction }} lakhs</div>
+                <div class="price-label">
+                    <i class="fas fa-rupee-sign"></i> Predicted Market Value
+                </div>
+            </div>
+            
+            <!-- Confidence Interval -->
+            {% if confidence_lower and confidence_upper %}
+            <div class="confidence-interval">
+                <h5><i class="fas fa-chart-line"></i> Confidence Interval</h5>
+                <p class="text-muted mb-3">Price range based on model uncertainty (±10%)</p>
+                <div class="confidence-range">
+                    <div class="range-item">
+                        <div class="range-value">₹{{ confidence_lower }}</div>
+                        <div class="range-label">Lower Bound</div>
+                    </div>
+                    <div class="range-item">
+                        <i class="fas fa-arrows-alt-h" style="color: #3498db; font-size: 24px;"></i>
+                    </div>
+                    <div class="range-item">
+                        <div class="range-value">₹{{ confidence_upper }}</div>
+                        <div class="range-label">Upper Bound</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Input Summary -->
+            {% if input_summary %}
+            <div class="input-summary">
+                <h5><i class="fas fa-info-circle"></i> Your Car Specifications</h5>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-value">{{ "{:,}".format(input_summary.kms_driven|int) }}</div>
+                        <div class="summary-label">Kilometers Driven</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value">{{ input_summary.mileage_kmpl }} km/l</div>
+                        <div class="summary-label">Mileage</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value">{{ "{:,}".format(input_summary.engine_cc|int) }} cc</div>
+                        <div class="summary-label">Engine Capacity</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value">{{ input_summary.max_power_bhp }} BHP</div>
+                        <div class="summary-label">Max Power</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value">{{ input_summary.torque_nm }} Nm</div>
+                        <div class="summary-label">Torque</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Model Information -->
+            {% if model_info %}
+            <div class="model-info-card">
+                <h6><i class="fas fa-robot"></i> Model Information</h6>
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <strong>{{ model_info.best_model or 'Advanced ML' }}</strong>
+                        <small class="d-block text-muted">Algorithm Used</small>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <strong>{{ "%.1f"|format((model_info.best_score * 100) if model_info.best_score else 0) }}%</strong>
+                        <small class="d-block text-muted">Model Accuracy</small>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <strong>{{ model_info.total_features or 'Multiple' }}</strong>
+                        <small class="d-block text-muted">Features Analyzed</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="divider"></div>
+            
+            <!-- Action Buttons -->
+            <div class="btn-group">
+                <a href="/" class="btn-custom btn-primary-custom">
+                    <i class="fas fa-calculator"></i> New Prediction
+                </a>
+                <button onclick="window.print()" class="btn-custom btn-secondary-custom">
+                    <i class="fas fa-print"></i> Print Result
+                </button>
+                <button onclick="shareResult()" class="btn-custom btn-secondary-custom">
+                    <i class="fas fa-share"></i> Share Result
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function shareResult() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Car Price Prediction Result',
+                    text: `Predicted car price: ₹{{ prediction }} lakhs`,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                const resultText = `Car Price Prediction Result: ₹{{ prediction }} lakhs`;
+                navigator.clipboard.writeText(resultText).then(function() {
+                    alert('Result copied to clipboard!');
+                });
+            }
+        }
+        
+        // Add print styles
+        const printStyles = `
+            <style media="print">
+                body { background: white !important; }
+                .btn-group { display: none !important; }
+                .price-display { background: #f8f9fa !important; color: #333 !important; }
+            </style>
+        `;
+        document.head.insertAdjacentHTML('beforeend', printStyles);
+    </script>
+</body>
+</html>
         <a href="/" class="btn btn-success">Go Back</a>
     </div>
 

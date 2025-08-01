@@ -1,9 +1,14 @@
-#Flask==2.2.3
-#pandas==2.2.3
-#scikit-learn==1.1.3  # Add this if you are using scikit-learn
-#joblib==1.2.0  # If used for saving models, keep it
-
-Flask
-pandas
-scikit-learn
-joblib
+Flask==2.3.3
+pandas==2.0.3
+numpy==1.24.4
+scikit-learn==1.3.0
+joblib==1.3.2
+matplotlib==3.7.2
+seaborn==0.12.2
+scipy==1.11.2
+Werkzeug==2.3.7
+Jinja2==3.1.2
+itsdangerous==2.1.2
+click==8.1.7
+MarkupSafe==2.1.3
+gunicorn==21.2.0

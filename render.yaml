@@ -1,0 +1,18 @@
+# Render.com deployment configuration
+# https://render.com/docs/yaml-spec
+
+services:
+  - type: web
+    name: car-price-prediction
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT app:app"
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.16
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_DEBUG
+        value: false
+    healthCheckPath: /health

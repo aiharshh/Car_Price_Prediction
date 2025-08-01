@@ -1,0 +1,162 @@
+{
+  "health_check": {
+    "status_code": 200,
+    "response_time": 2.053636,
+    "response": {
+      "model_loaded": true,
+      "status": "healthy",
+      "timestamp": "2025-08-01T13:58:53.903803"
+    }
+  },
+  "model_info": {
+    "status_code": 200,
+    "response_time": 2.053743,
+    "response": {
+      "feature_columns_loaded": true,
+      "metadata": {
+        "best_model": "Gradient Boosting",
+        "best_score": 0.7688633259895594,
+        "test_samples": 134,
+        "timestamp": "2025-08-01T13:58:03.382667",
+        "total_features": 18,
+        "training_samples": 533
+      },
+      "model_loaded": true,
+      "scaler_loaded": true,
+      "server_time": "2025-08-01T13:58:55.959006",
+      "total_features": 18
+    }
+  },
+  "web_interface": {
+    "status_code": 200,
+    "response_time": 2.115209,
+    "content_length": 14588
+  },
+  "single_prediction_api": {
+    "status_code": 200,
+    "response_time": 2.0669045448303223,
+    "test_data": {
+      "kms_driven": 45000,
+      "mileage_kmpl": 18.5,
+      "engine_cc": 1500,
+      "max_power_bhp": 120,
+      "torque_nm": 200
+    },
+    "response": {
+      "confidence_interval": {
+        "lower": 8.05,
+        "upper": 9.84
+      },
+      "input_features": {
+        "age_factor": 10.714439990727769,
+        "efficiency_ratio": 12.333333333333334,
+        "engine(cc)": 1500.0,
+        "engine_category_Large": 0,
+        "engine_category_Medium": 1,
+        "engine_category_Small": 0,
+        "engine_category_Very Large": 0,
+        "kms_driven": 45000.0,
+        "max_power(bhp)": 120.0,
+        "mileage(kmpl)": 18.5,
+        "mileage_category_High": 1,
+        "mileage_category_Low": 0,
+        "mileage_category_Medium": 0,
+        "mileage_category_Very High": 0,
+        "power_efficiency": 6.486486486486487,
+        "power_to_weight": 80.0,
+        "torque(Nm)": 200.0,
+        "torque_per_cc": 0.13333333333333333
+      },
+      "model_info": {
+        "best_model": "Gradient Boosting",
+        "best_score": 0.7688633259895594,
+        "test_samples": 134,
+        "timestamp": "2025-08-01T13:58:03.382667",
+        "total_features": 18,
+        "training_samples": 533
+      },
+      "predicted_price": 8.95,
+      "timestamp": "2025-08-01T13:59:00.143446"
+    }
+  },
+  "batch_prediction_api": {
+    "status_code": 200,
+    "response_time": 2.0331528186798096,
+    "test_data": {
+      "predictions": [
+        {
+          "kms_driven": 25000,
+          "mileage_kmpl": 20.0,
+          "engine_cc": 1200,
+          "max_power_bhp": 85,
+          "torque_nm": 150
+        },
+        {
+          "kms_driven": 55000,
+          "mileage_kmpl": 15.5,
+          "engine_cc": 1800,
+          "max_power_bhp": 140,
+          "torque_nm": 250
+        },
+        {
+          "kms_driven": 35000,
+          "mileage_kmpl": 18.0,
+          "engine_cc": 1400,
+          "max_power_bhp": 110,
+          "torque_nm": 180
+        }
+      ]
+    },
+    "response": {
+      "errors": [],
+      "results": [
+        {
+          "confidence_interval": {
+            "lower": 8.05,
+            "upper": 9.84
+          },
+          "index": 0,
+          "predicted_price": 8.95
+        },
+        {
+          "confidence_interval": {
+            "lower": 7.68,
+            "upper": 9.39
+          },
+          "index": 1,
+          "predicted_price": 8.53
+        },
+        {
+          "confidence_interval": {
+            "lower": 8.05,
+            "upper": 9.84
+          },
+          "index": 2,
+          "predicted_price": 8.95
+        }
+      ],
+      "timestamp": "2025-08-01T13:59:02.177162",
+      "total_errors": 0,
+      "total_processed": 3
+    }
+  },
+  "error_handling": {
+    "tests_passed": 3,
+    "total_tests": 3
+  },
+  "performance": {
+    "successful_requests": 10,
+    "total_requests": 10,
+    "avg_response_time": 2.060361909866333,
+    "min_response_time": 2.0366179943084717,
+    "max_response_time": 2.088765859603882
+  },
+  "summary": {
+    "total_tests": 7,
+    "passed_tests": 7,
+    "failed_tests": 0,
+    "success_rate": 100.0,
+    "test_duration": 37.090958,
+    "test_timestamp": "2025-08-01T13:58:51.849064"
+  }
+}
