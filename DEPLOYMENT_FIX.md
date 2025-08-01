@@ -18,6 +18,7 @@ Both the `_loss` module error AND the 0% accuracy issue have been fixed with a *
 Your Render deployment at: `https://car-price-prediction-1yfs.onrender.com`
 
 ### **Current Behavior:**
+
 - ✅ **App is LIVE and working**
 - ✅ **Accuracy Fixed**: ~60% instead of 0%
 - 🔄 **Smart data repair** - fixes corrupted data automatically
@@ -26,11 +27,13 @@ Your Render deployment at: `https://car-price-prediction-1yfs.onrender.com`
 ## 🎯 **How to Deploy the Accuracy Fix:**
 
 ### **Option 1: Quick Deploy Script (Recommended)**
+
 ```bash
 python deploy_fix.py
 ```
 
 ### **Option 2: Manual Deploy**
+
 ```bash
 git add .
 git commit -m "Fixed model accuracy - smart data repair with 59.52% R2 score"
@@ -38,6 +41,7 @@ git push origin main
 ```
 
 ### **Option 3: Test Current Deployment**
+
 1. Go to your app: https://car-price-prediction-1yfs.onrender.com
 2. Make ANY prediction (the enhanced system will auto-train)
 3. Check accuracy - should be ~60% instead of 0%
@@ -47,6 +51,7 @@ git push origin main
 1. **First Visit**: App loads, model not available
 2. **First Prediction**: Triggers automatic model training (30-60 seconds)
 3. **All Subsequent Predictions**: Instant and accurate
+
 ## 🚀 **Expected Results After Fix:**
 
 1. **Model Loading**: Automatic fallback with smart data repair
